@@ -1,0 +1,4 @@
+interface:
+  display_name: "App Store Submissions"
+  short_description: "Audit and prepare Apple and Google submissions"
+  default_prompt: "Use $app-store-submissions to audit this app project folder, identify submission restrictions, and prepare the Apple App Store and Google Play fields."
