@@ -6,7 +6,7 @@ Use for Apple submissions. Inspect the selected platform and version; required f
 
 - App record: name, subtitle, primary language, bundle ID, SKU where applicable, categories, and content rights. Preserve established identifiers; resolve missing identifiers before creating a record.
 - Version listing: promotional text, description, keywords, support URL, optional marketing URL, copyright, and What's New for updates. Keep reviewer notes separate from public copy.
-- Assets: screenshots and optional previews for applicable devices/locales. Inspect dimensions, format, and app representation before uploading.
+- Assets: screenshots and optional previews for applicable devices/locales. For a project-local screenshot workspace and validation, read [assets.md](assets.md). Inspect dimensions, format, alpha channel, and app representation before uploading.
 - Review: selected processed build, contact information, sign-in requirement, reviewer access, and steps for reaching gated features. Identify OTP, paywall, location, hardware, or backend dependencies that could prevent review. Use supplied dedicated review access; do not invent credentials.
 - Declarations: app privacy, privacy policy, age-rating questionnaire, content rights, export compliance/encryption, and feature/region-specific questions. Assess accessibility claims only for features actually verified.
 - Release: pricing, territories, release option, and rollout settings within scope. Check applicable in-app purchases/subscriptions and account prerequisites without silently changing them.

@@ -6,7 +6,7 @@ Use for Android submissions. Inspect the app dashboard and publishing overview f
 
 - App record: package identity, default language, app/game selection, free/paid status, category/tags, and developer contact details. Resolve new-record choices from the user's business intent; do not alter existing pricing as a convenience.
 - Main store listing per locale: app name, short description, full description, and relevant contact/website fields. Google Play has no equivalent to Apple's separate keyword field.
-- Assets: app icon, feature graphic, screenshots for applicable form factors, and optional video. Check current size, format, count, and content rules for each asset and locale.
+- Assets: app icon, feature graphic, screenshots for applicable form factors, and optional video. For a project-local screenshot workspace and validation, read [assets.md](assets.md). Check current size, format, count, alpha channel, and content rules for each asset and locale.
 - App content: privacy policy, ads declaration, app access instructions, content rating, target audience, Data safety, and applicable permissions or category-specific declarations. Include account-deletion details where applicable. Do not equate intended audience with the resulting content rating.
 - Release: intended track, supplied build/version code, release name and localized release notes, countries, rollout, and publishing controls. Verify dashboard prerequisites, including applicable testing/production-access and target API requirements; do not hardcode thresholds that may change.
 

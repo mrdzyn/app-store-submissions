@@ -1,11 +1,11 @@
 ---
 name: app-store-submissions
-description: Audit an app project folder and prepare, check, or fill Apple App Store Connect and Google Play Console submissions, including listing copy, assets, review instructions, privacy questionnaires, and release metadata. Use for repository-based submission readiness checks, new apps, version updates, incomplete store forms, or rejection-related metadata fixes.
+description: Audit an app project folder and prepare, check, or fill Apple App Store Connect and Google Play Console submissions, including store assets, screenshot checklists, review instructions, privacy questionnaires, and release metadata. Use for repository-based submission readiness checks, new apps, version updates, incomplete store forms, or rejection-related metadata fixes.
 ---
 
 # App Store Submissions
 
-Turn app evidence into accurate, ready-to-paste store fields, and enter them in the correct store record when requested. Support either store independently or both together. Preparing a submission does not itself include building the app, producing new artwork, or publishing a release.
+Turn app evidence into accurate, ready-to-paste store fields and compliant submission assets, then enter them in the correct store record when requested. Support either store independently or both together. Preparing a submission does not itself include building the app or publishing a release.
 
 ## Establish scope and evidence
 
@@ -23,10 +23,21 @@ Start from the supplied folder, respect repository instructions such as `AGENTS.
 
 The audit is read-only unless the user asks for fixes. Report evidence with file paths and line numbers when practical. Separate confirmed restrictions, likely submission questions, missing evidence, and ordinary recommendations. A code search can prove a feature or SDK is present; it rarely proves that data collection, server behavior, retention, deletion, or production configuration is absent.
 
+## Prepare store assets and screenshots
+
+When the user asks for submission assets, screenshots, or a complete submission package, read [references/assets.md](references/assets.md). Create the project-local `assets/screenshots/` workspace and its tickable `CHECKLIST.md` with [scripts/prepare_store_assets.py](scripts/prepare_store_assets.py). Use the app's detected targets to include only relevant device families. Do not overwrite an existing checklist or any existing asset.
+
+Prompt the user to save real app captures in the checklist's named folders. If a running build, emulator, or device is available, help capture the real flows and save them there. Otherwise, identify the exact screens to capture and wait for actual captures. Do not generate or submit synthetic screenshots, invented UI, or edited screenshots that misrepresent the app's current experience.
+
+Use image generation for missing supporting marketing artwork when the user has asked for assets and sufficient app/brand evidence exists. In particular, it can draft a Google Play feature graphic or non-app screenshot background treatment. Base prompts on verified app facts and provided brand materials, inspect the result, then save the selected final artifact in the checklist's destination without overwriting user work. Use image processing as needed to make the saved file match the required dimensions, format, and alpha-channel rules. Never use image generation to replace the actual app interface in a store screenshot.
+
+Run the helper's `validate` command before uploading assets. It verifies required folder content, common formats, pixel dimensions, count limits, and detectable PNG alpha channels. Treat current console validation as decisive, and resolve its errors before uploading. Codex may change only completed checklist rows to `[x]` after it has verified the corresponding file; the user may tick rows manually as captures are saved.
+
 ## Prepare the relevant store fields
 
 - For Apple, read [references/apple.md](references/apple.md).
 - For Google Play, read [references/google-play.md](references/google-play.md).
+- For asset requirements and the screenshot workspace, read [references/assets.md](references/assets.md).
 
 Check current official documentation and the actual console for field names, length/count rules, asset specifications, policy questions, and conditional requirements. References are navigation aids, not frozen policy. Record the source URL and check date for consequential requirements. If current verification is unavailable, label the affected requirement unverified and prepare the rest.
 
