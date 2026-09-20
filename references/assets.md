@@ -16,6 +16,7 @@ Add `--apple-ipad`, `--apple-mac`, or `--google-tablet` only when those targets 
 assets/
   screenshots/
     CHECKLIST.md
+    source/                       # original user-provided captures
     apple/iphone-6.9/
     apple/ipad-13/                 # when selected
     google-play/phone/
@@ -24,7 +25,7 @@ assets/
     google-play/
 ```
 
-`CHECKLIST.md` contains individual Markdown checkboxes, exact filename suggestions, required or recommended dimensions, and a short capture plan. The user can tick boxes while saving captures. Codex can tick a row only after the corresponding file passes verification.
+`CHECKLIST.md` contains individual Markdown checkboxes, exact filename suggestions, required or recommended dimensions, and a short capture plan. Save original captures in `source/`; the render helper writes direct-upload exports to the store-specific folders. The user can tick boxes while saving captures. Codex can tick a row only after the corresponding file passes verification.
 
 ## Screenshot rules
 
@@ -41,17 +42,44 @@ The helper's initial checklist uses these current baseline targets:
 
 Apple accepts one to ten screenshots and scales some newer device screenshots for smaller displays. The currently selected 6.9-inch iPhone and 13-inch iPad targets cover the required categories for ordinary iPhone/iPad submissions, but console requirements control for the submitted app. Google Play supports up to eight screenshots per device type and requires at least two across device types to publish; its recommendation surfaces have stricter screenshot counts and resolutions.
 
-Run this after saving assets:
+## Render and validate user-provided captures
+
+The render helper uses Pillow. Install it in the active Python environment once when needed:
+
+```bash
+python3 -m pip install -r scripts/requirements.txt
+```
+
+Create a direct iPhone export from a real source capture. The source remains unchanged:
+
+```bash
+python3 scripts/render_store_screenshots.py /path/to/project \
+  --source /path/to/project/assets/screenshots/source/home.png \
+  --target apple-iphone-6.9-portrait --name 01 --style direct
+```
+
+For a marketing composition, supply only accurate copy that is already supported by the app and its listing. The whole captured interface stays visible on a branded canvas; Google Play copy occupies no more than 20% of the image.
+
+```bash
+python3 scripts/render_store_screenshots.py /path/to/project \
+  --source /path/to/project/assets/screenshots/source/home.png \
+  --target google-phone-portrait --name 01 --style marketing \
+  --headline "Plan your day in one place" --background "#123047"
+```
+
+Direct mode rejects captures whose aspect ratio differs from the target by more than 1%. Re-capture on the required simulator/device or use `--allow-crop` only after confirming that the crop does not conceal or change any interface content. The helper flattens the final screenshot to a non-alpha RGB PNG or JPEG as required. It never overwrites an export without `--replace`.
+
+Run this after rendering the asset set:
 
 ```bash
 python3 scripts/prepare_store_assets.py validate /path/to/project
 ```
 
-The validator cannot determine visual truthfulness, embedded text policy, runtime state, or current console-specific conditions. Inspect those manually and use the console's final validation.
+The renderer and validator cannot determine visual truthfulness, embedded-text policy, runtime state, or current console-specific conditions. Inspect those manually and use the console's final validation.
 
 ## Generate supporting graphics
 
-Use image generation only for graphics that do not claim to be a direct app capture, such as a Google Play feature graphic, illustrated background, or other non-UI artwork. Do not generate a new brand icon if the project already has an approved editable logo or icon source; adapt that source instead.
+Use image generation only for graphics that do not claim to be a direct app capture, such as a Google Play feature graphic, illustrated background, or other non-UI artwork. It may provide a background for a marketing composition, but must never modify, extend, or fabricate the captured app interface. Do not generate a new brand icon if the project already has an approved editable logo or icon source; adapt that source instead.
 
 For a missing Google Play feature graphic, create a `1024×500` JPEG or 24-bit PNG with no alpha and save it as `assets/store-graphics/google-play/feature-graphic.png` or `.jpg`. Keep focal content near the centre, avoid store badges, ranking/award/price claims, calls to action, and unlicensed third-party marks. For the app icon, use the app's approved icon source; Google Play requires a `512×512` 32-bit PNG with alpha and a maximum size of 1 MB.
 

@@ -95,7 +95,7 @@ def checklist(args: argparse.Namespace) -> str:
         "",
         "- [ ] Confirm the selected stores, locale, supported device families, and orientation in the current store consoles.",
         "- [ ] Capture the signed-off build with representative content and no personal data, test markers, or debug controls.",
-        "- [ ] Keep source captures outside the final paths if they need compositing or review.",
+        "- [ ] Save original captures in `assets/screenshots/source/`; keep store-specific folders for final rendered exports only.",
         "",
     ]
     if "apple" in args.stores:
@@ -145,6 +145,7 @@ def checklist(args: argparse.Namespace) -> str:
     sections.extend([
         "## Final verification",
         "",
+        "- [ ] Render each original from `assets/screenshots/source/` with `scripts/render_store_screenshots.py`; use direct mode for faithful exports or marketing mode only with accurate copy and a real, fully visible app capture.",
         "- [ ] Run `python3 scripts/prepare_store_assets.py validate /path/to/project` from this skill's folder.",
         "- [ ] Review every image for truthful UI, legibility, localization, and store content-policy compliance.",
         "- [ ] Confirm the current App Store Connect and Play Console accept the selected files before upload.",
@@ -160,7 +161,7 @@ def init_workspace(args: argparse.Namespace) -> int:
         return 2
 
     screenshots = project / "assets" / "screenshots"
-    folders = []
+    folders = [screenshots / "source"]
     if "apple" in args.stores:
         folders.append(screenshots / "apple" / "iphone-6.9")
         if args.apple_ipad:
