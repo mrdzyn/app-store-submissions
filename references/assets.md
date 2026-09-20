@@ -69,6 +69,8 @@ python3 scripts/render_store_screenshots.py /path/to/project \
 
 Direct mode rejects captures whose aspect ratio differs from the target by more than 1%. Re-capture on the required simulator/device or use `--allow-crop` only after confirming that the crop does not conceal or change any interface content. The helper flattens the final screenshot to a non-alpha RGB PNG or JPEG as required. It never overwrites an export without `--replace`.
 
+For `--target google-feature-graphic`, omit `--name`; the helper automatically writes `assets/store-graphics/google-play/feature-graphic.png` (or `.jpg`). Screenshot targets require `--name`. The helper wraps long copy at character boundaries and stops if all copy cannot fit in the permitted header area.
+
 Run this after rendering the asset set:
 
 ```bash

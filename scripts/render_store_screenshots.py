@@ -44,7 +44,10 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("project", type=Path, help="App project folder")
     parser.add_argument("--source", required=True, type=Path, help="Original user-provided screenshot")
     parser.add_argument("--target", required=True, choices=sorted(TARGETS), help="Required store asset target")
-    parser.add_argument("--name", required=True, help="Output base name, for example 01 or onboarding")
+    parser.add_argument(
+        "--name",
+        help="Output base name, for example 01 or onboarding; defaults to feature-graphic for that target",
+    )
     parser.add_argument("--style", choices=("direct", "marketing"), default="direct")
     parser.add_argument("--headline", help="Accurate optional marketing headline")
     parser.add_argument("--subheadline", help="Accurate optional supporting copy")
@@ -84,13 +87,38 @@ def load_font(size: int, requested: Path | None) -> ImageFont.FreeTypeFont | Ima
 
 
 def wrap(draw: ImageDraw.ImageDraw, text: str, font: ImageFont.ImageFont, max_width: int) -> list[str]:
+    def width(value: str) -> int:
+        return draw.textbbox((0, 0), value, font=font)[2]
+
+    def split_long_word(word: str) -> list[str]:
+        pieces: list[str] = []
+        current = ""
+        for character in word:
+            proposed = f"{current}{character}"
+            if current and width(proposed) > max_width:
+                pieces.append(current)
+                current = character
+            else:
+                current = proposed
+        if current:
+            pieces.append(current)
+        return pieces
+
     lines: list[str] = []
     for paragraph in text.splitlines() or [text]:
         words = paragraph.split()
         current = ""
         for word in words:
+            if width(word) > max_width:
+                if current:
+                    lines.append(current)
+                    current = ""
+                pieces = split_long_word(word)
+                lines.extend(pieces[:-1])
+                current = pieces[-1]
+                continue
             proposed = f"{current} {word}".strip()
-            if current and draw.textbbox((0, 0), proposed, font=font)[2] > max_width:
+            if current and width(proposed) > max_width:
                 lines.append(current)
                 current = word
             else:
@@ -181,7 +209,14 @@ def main() -> int:
     if not source_path.is_file():
         raise SystemExit(f"Source image does not exist: {source_path}")
     try:
-        name = safe_name(args.name)
+        if args.target == "google-feature-graphic":
+            if args.name and args.name != "feature-graphic":
+                raise ValueError("--name must be feature-graphic for the Google Play feature graphic target")
+            name = "feature-graphic"
+        elif not args.name:
+            raise ValueError("--name is required for screenshot targets")
+        else:
+            name = safe_name(args.name)
         output_dir = (project / "assets" / "screenshots" / target.folder).resolve()
         extension = ".jpg" if args.format == "jpg" else ".png"
         output = output_dir / f"{name}{extension}"
