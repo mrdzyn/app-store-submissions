@@ -70,20 +70,60 @@ def resample() -> int:
     return Image.Resampling.LANCZOS
 
 
-def load_font(size: int, requested: Path | None) -> ImageFont.FreeTypeFont | ImageFont.ImageFont:
-    candidates = [requested] if requested else []
-    candidates.extend(
-        Path(path)
-        for path in (
+def supports_text(font: ImageFont.FreeTypeFont | ImageFont.ImageFont, text: str) -> bool:
+    """Detect the missing-glyph box used by FreeType for unsupported characters."""
+    missing_glyph = bytes(font.getmask("\ufffd"))
+    return all(
+        character.isspace() or character == "\ufffd" or bytes(font.getmask(character)) != missing_glyph
+        for character in set(text)
+    )
+
+
+def load_font(
+    size: int,
+    requested: Path | None,
+    text: str,
+) -> ImageFont.FreeTypeFont | ImageFont.ImageFont:
+    if requested:
+        candidates = [requested]
+    else:
+        unicode_fonts = (
+            "/System/Library/Fonts/Supplemental/Arial Unicode.ttf",
+            "/System/Library/Fonts/Hiragino Sans GB.ttc",
+            "/System/Library/Fonts/AppleSDGothicNeo.ttc",
+            "/System/Library/Fonts/STHeiti Medium.ttc",
+            "/usr/share/fonts/opentype/noto/NotoSansCJK-Regular.ttc",
+            "/usr/share/fonts/truetype/noto/NotoSansCJK-Regular.ttc",
+            "C:/Windows/Fonts/arialuni.ttf",
+            "C:/Windows/Fonts/msgothic.ttc",
+            "C:/Windows/Fonts/malgun.ttf",
+            "C:/Windows/Fonts/simsun.ttc",
+        )
+        display_fonts = (
             "/System/Library/Fonts/Supplemental/Arial Bold.ttf",
             "/usr/share/fonts/truetype/dejavu/DejaVuSans-Bold.ttf",
             "/usr/share/fonts/truetype/liberation2/LiberationSans-Bold.ttf",
         )
-    )
+        if any(ord(character) > 127 for character in text):
+            font_paths = unicode_fonts + display_fonts
+        else:
+            font_paths = display_fonts + unicode_fonts
+        candidates = [Path(path) for path in font_paths]
     for path in candidates:
-        if path and path.exists():
-            return ImageFont.truetype(str(path), size=size)
-    return ImageFont.load_default()
+        if not path.is_file():
+            continue
+        try:
+            font = ImageFont.truetype(str(path), size=size)
+        except OSError:
+            continue
+        if supports_text(font, text):
+            return font
+    fallback = ImageFont.load_default()
+    if supports_text(fallback, text):
+        return fallback
+    raise ValueError(
+        "No available font supports all marketing copy. Supply --font with a TrueType or OpenType font for this locale."
+    )
 
 
 def wrap(draw: ImageDraw.ImageDraw, text: str, font: ImageFont.ImageFont, max_width: int) -> list[str]:
@@ -141,7 +181,7 @@ def draw_copy(
     draw = ImageDraw.Draw(image)
     max_width = int(image.width * 0.84)
     x = int(image.width * 0.08)
-    headline_font = load_font(max(28, int(image.width * 0.06)), requested_font)
+    headline_font = load_font(max(28, int(image.width * 0.06)), requested_font, headline)
     headline_lines = wrap(draw, headline, headline_font, max_width)
     y = int(image.height * 0.055)
     for line in headline_lines:
@@ -149,7 +189,7 @@ def draw_copy(
         draw.text((x, y), line, font=headline_font, fill=color)
         y += bounds[3] - bounds[1] + int(image.height * 0.012)
     if subheadline:
-        sub_font = load_font(max(20, int(image.width * 0.03)), requested_font)
+        sub_font = load_font(max(20, int(image.width * 0.03)), requested_font, subheadline)
         for line in wrap(draw, subheadline, sub_font, max_width):
             bounds = draw.textbbox((0, 0), line, font=sub_font)
             draw.text((x, y), line, font=sub_font, fill=color)
